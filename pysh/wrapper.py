@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-NOT_PRINTED = "<PYSHCommandResult>\n"
+NOT_PRINTED = "<PYSHCommand>\n"
 
 
 def main():

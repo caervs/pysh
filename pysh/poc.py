@@ -1,10 +1,10 @@
 from subprocess import Popen
 
-
 # Ideas for flushing shell in non-interactive mode
 # - shell is a context manager
 # - call call to slush it
 # - shell decorates function
+
 
 class Shell(object):
     def __init__(self):
@@ -31,16 +31,25 @@ class AtomicCommandFactory(object):
 
 
 class Command(object):
-    pass
+    def __call__(self):
+        pass
 
+    def __or__(self, other):
+        routing_policy = {
+            0: {
+                'stdin': (-1, 'stdout'),
+            },
+            1: {
+                'stdin': (0, 'stdout'),
+            },
+        }
+        return CompositeCommand([self, other], routing_policy)
 
-class CommandOutput(str):
-    def __init__(self, value):
-        self.value = value
-        self.__dict__ = {}
-
-    def __getattr__(self, attr_name):
-        return self.__dict__[attr_name]
+    def __repr__(self):
+        if self.status is None:
+            self()
+        return ""
+        #return "<PYSHCommand>"
 
 
 class AtomicCommand(Command):
@@ -50,22 +59,22 @@ class AtomicCommand(Command):
             key, value) for key, value in kwargs.items())
         self.status = None
 
-    def __call__(self):
+    def __call__(self, stdin=None, stdout=None, stderr=None):
         if self.status is not None:
             return self.status
 
+        stdin = self.shell.stdin if stdin is None else stdin
+        stdout = self.shell.stdout if stdout is None else stdout
+        stderr = self.shell.stderr if stderr is None else stderr
+
         proc = Popen(self.args,
                      cwd=self.shell.wd,
-                     stdin=self.shell.stdin,
-                     stdout=self.shell.stdout,
-                     stderr=self.shell.stderr)
+                     stdin=stdin,
+                     stdout=stdout,
+                     stderr=stderr)
         self.status = proc.wait()
         return self.status
 
-    def __repr__(self):
-        if self.status is None:
-            self()
-        return "<PYSHCommandResult>"
 
 
 class CompositeCommand(Command):
