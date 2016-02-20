@@ -3,6 +3,7 @@ import functools
 import importlib
 import os
 import subprocess
+import sys
 
 from pysh.interface.command import ProcessCommand
 
@@ -12,6 +13,7 @@ STANDARD_SEARCH_PATH = ":".join(["pysh.scopes.local.commands",
                                  "pysh.scopes.standard.commands", ])
 
 SEARCH_PATH = os.environ.get("PYSHPATH", STANDARD_SEARCH_PATH)
+DELETE_STRING = "--DELETE NEXT 348ty1[29yavi--"
 
 
 class CommandCall(object):
@@ -37,6 +39,10 @@ class CommandCall(object):
         yield self.to_str(self.command.stdout.read())
         yield self.to_str(self.command.stderr.read())
 
+    def __repr__(self):
+        self()
+        return DELETE_STRING
+
     @staticmethod
     def to_str(str_or_byte):
         if isinstance(str_or_byte, str):
@@ -59,7 +65,8 @@ class PipingCall(CommandCall):
         first(wait=False, **first_channels)
         previous_command = first
         for command in middle:
-            command(wait=False, stdin=previous_command.stdout,
+            command(wait=False,
+                    stdin=previous_command.stdout,
                     stdout=subprocess.PIPE)
             previous_command = command
         last(wait=False, stdin=previous_command.stdout, **channels)
@@ -78,9 +85,29 @@ class ExecutionMode(enum.Enum):
     on_read = 1
 
 
+class PartialCall(object):
+    def __init__(self, command_factory, working_dir):
+        # TODO proper wrapping of command_factory
+        self.command_factory = command_factory
+        self.working_dir = working_dir
+
+    def __call__(self, *args, **kwargs):
+        os.chdir(self.working_dir)
+        return CommandCall(self.command_factory(*args, **kwargs))
+
+    def __repr__(self):
+        return repr(self())
+
+    def __or__(self, other):
+        # TODO support reverse operations
+        if isinstance(other, PartialCall):
+            return self() | other()
+        return self() | other
+
+
 class Shell(object):
     def __init__(self,
-                 working_dir,
+                 working_dir='.',
                  search_path=SEARCH_PATH,
                  execution_mode=ExecutionMode.on_read):
         if execution_mode != ExecutionMode.on_read:
@@ -97,20 +124,35 @@ class Shell(object):
 
     @staticmethod
     def get_search_objs(search_path):
+        if not search_path:
+            return []
         return [importlib.import_module(module)
                 for module in search_path.split(":")]
-
-    def get_partial_call(self, command_factory):
-        @functools.wraps(command_factory)
-        def partial_call(*args, **kwargs):
-            os.chdir(self.working_dir)
-            return CommandCall(command_factory(*args, **kwargs))
-
-        return partial_call
 
     def __getattr__(self, cmd_name):
         for search_obj in self.search_objs:
             if hasattr(search_obj, cmd_name):
                 command_factory = getattr(search_obj, cmd_name)
-                return self.get_partial_call(command_factory)
-        return self.get_partial_call(ProcessCommand.from_proc_name(cmd_name))
+                return PartialCall(command_factory, self.working_dir)
+        return PartialCall(
+            ProcessCommand.from_proc_name(cmd_name), self.working_dir)
+
+
+class FallbackChain(object):
+    def __init__(self, *obj_chain):
+        self.__dict__['obj_chain'] = obj_chain
+
+    def __getattr__(self, attr_name):
+        for obj in self.obj_chain:
+            if hasattr(obj, attr_name):
+                return getattr(obj, attr_name)
+        raise AttributeError(key)
+
+    def __setattr__(self, attr_name, attr):
+        return setattr(self.obj_chain[0], attr_name, attr)
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)

@@ -70,4 +70,4 @@ class PipingWorks(ShellTestCase):
         out, _err = functools.reduce(operator.or_,
                                      map(self.shell.grep, expressions),
                                      self.shell.cat("example_file.txt"))
-        self.assertEqual(out, "Hello")
+        self.assertEqual(out, "Hello\n")

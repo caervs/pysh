@@ -83,23 +83,3 @@ class CompositeCommand(Command):
 
     def __call__(self, *args, **kwargs):
         pass
-
-
-class HierarchicalObject(object):
-    def __init__(self, *obj_chain):
-        self.__dict__['obj_chain'] = obj_chain
-
-    def __getattr__(self, attr_name):
-        for obj in self.obj_chain:
-            if hasattr(obj, attr_name):
-                return getattr(obj, attr_name)
-        raise AttributeError(key)
-
-    def __setattr__(self, attr_name, attr):
-        return setattr(self.obj_chain[0], attr_name, attr)
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
