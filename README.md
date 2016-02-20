@@ -45,3 +45,15 @@ Top level commands:
 - init: create the .pysh directory
 - config: modify local or global pysh configuration (change settings, add packages, etc)
 - edit: edit a local pysh module
+
+## Why would you do this?
+
+All the power of your OS and the expressability of python -- 
+
+example -- doing a grep chain
+
+expressions = [...]
+
+out, err = reduce(operator.or_, map(shell.grep, expressions),
+                  shell.cat('file.txt'))
+
