@@ -1,4 +1,7 @@
+import functools
 import io
+import operator
+import os
 import unittest
 
 from pysh.interface import shell
@@ -8,7 +11,8 @@ from pysh.examples import posix
 
 class ShellTestCase(unittest.TestCase):
     def setUp(self):
-        self.shell = shell.Shell(".", "pysh.examples.posix")
+        test_dir = os.path.dirname(__file__)
+        self.shell = shell.Shell(test_dir, "pysh.examples.posix")
         for command in ["grep", "echo"]:
             new_name = "posix_" + command
             setattr(posix, new_name, getattr(posix, command))
@@ -56,9 +60,14 @@ class PipingWorks(ShellTestCase):
         out, _err = echo("Hello\nWorld!\n") | grep("Wo")
         self.assertEqual(out, "World!\n")
 
-    # TODO support for double pipes
     def test_double_pipe(self):
-        return
         echo, grep = self.shell.echo, self.shell.grep
         out, _err = echo("Hello\nWorld!\n") | grep("W") | grep("o")
         self.assertEqual(out, "World!\n")
+
+    def test_pipe_chain(self):
+        expressions = ['H', 'e', 'l', 'o']
+        out, _err = functools.reduce(operator.or_,
+                                     map(self.shell.grep, expressions),
+                                     self.shell.cat("example_file.txt"))
+        self.assertEqual(out, "Hello")

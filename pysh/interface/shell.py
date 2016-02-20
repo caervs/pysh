@@ -14,13 +14,17 @@ STANDARD_SEARCH_PATH = ":".join(["pysh.scopes.local.commands",
 SEARCH_PATH = os.environ.get("PYSHPATH", STANDARD_SEARCH_PATH)
 
 
-class CommandResult(object):
+class CommandCall(object):
     def __init__(self, command):
         self.command = command
         self.status = None
 
     def __or__(self, other):
-        return PipingResult(self.command, other.command)
+        left_commands = [self.command] if hasattr(self, 'command') else \
+                        self.commands
+        right_commands = [other.command] if hasattr(other, 'command') else \
+                         other.commands
+        return PipingCall(left_commands + right_commands)
 
     def __call__(self, wait=True, **channels):
         if self.status is not None:
@@ -41,26 +45,32 @@ class CommandResult(object):
 
 
 # TODO should be able to generalize to arbitrary IO redirection
-class PipingResult(CommandResult):
-    def __init__(self, carcmd, cdrcmd):
-        self.carcmd = carcmd
-        self.cdrcmd = cdrcmd
+class PipingCall(CommandCall):
+    def __init__(self, commands):
+        self.commands = commands
 
     def __call__(self, wait=True, **channels):
-        car_channels = {'stdout': subprocess.PIPE}
-        cdr_channels = channels
+        first, *middle, last = self.commands
+        first_channels = {'stdout': subprocess.PIPE}
+        last_channels = channels
         if 'stdin' in channels:
-            car_channels['stdin'] = channels['stdin']
+            first_channels['stdin'] = channels['stdin']
             del channels['stdin']
-        self.carcmd(wait=False, **car_channels)
-        self.cdrcmd(wait=False, stdin=self.carcmd.stdout, **cdr_channels)
+        first(wait=False, **first_channels)
+        previous_command = first
+        for command in middle:
+            command(wait=False, stdin=previous_command.stdout,
+                    stdout=subprocess.PIPE)
+            previous_command = command
+        last(wait=False, stdin=previous_command.stdout, **channels)
         if wait:
-            return self.carcmd.wait(), self.cdrcmd.wait()
+            for command in self.commands:
+                command.wait()
 
     def __iter__(self):
         self(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        yield self.to_str(self.cdrcmd.stdout.read())
-        yield self.to_str(self.cdrcmd.stderr.read())
+        yield self.to_str(self.commands[-1].stdout.read())
+        yield self.to_str(self.commands[-1].stderr.read())
 
 
 class ExecutionMode(enum.Enum):
@@ -77,6 +87,7 @@ class Shell(object):
             raise NotImplementedError(
                 "Non on-read execution mode not implemented")
         self.search_objs = self.get_search_objs(search_path)
+        self.working_dir = working_dir
 
     def cd(self, new_dir):
         self.working_dir = new_dir
@@ -89,16 +100,17 @@ class Shell(object):
         return [importlib.import_module(module)
                 for module in search_path.split(":")]
 
-    def get_partial_result(self, command_factory):
+    def get_partial_call(self, command_factory):
         @functools.wraps(command_factory)
-        def partial_result(*args, **kwargs):
-            return CommandResult(command_factory(*args, **kwargs))
+        def partial_call(*args, **kwargs):
+            os.chdir(self.working_dir)
+            return CommandCall(command_factory(*args, **kwargs))
 
-        return partial_result
+        return partial_call
 
     def __getattr__(self, cmd_name):
         for search_obj in self.search_objs:
             if hasattr(search_obj, cmd_name):
                 command_factory = getattr(search_obj, cmd_name)
-                return self.get_partial_result(command_factory)
-        return self.get_partial_result(ProcessCommand.from_proc_name(cmd_name))
+                return self.get_partial_call(command_factory)
+        return self.get_partial_call(ProcessCommand.from_proc_name(cmd_name))
