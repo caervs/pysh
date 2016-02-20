@@ -23,8 +23,11 @@ class OutWrapper(object):
 
 def main():
     sys.stdout = OutWrapper()
+    builtins = globals()['__builtins__']
     globals()['__builtins__'] = shell.FallbackChain(
-        globals()['__builtins__'], shell.Shell(search_path=''))
+        builtins, shell.Shell(search_path=''))
+    globals()['__builtins__'].__import__ = builtins.__import__
+
 
 if __name__ == "__main__":
     main()
