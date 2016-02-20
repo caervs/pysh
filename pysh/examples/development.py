@@ -1,8 +1,13 @@
+from pysh.interface.shell import Shell
+
+SH = Shell(search_path='')
+
+
 def test():
     """
     Run nose tests with coverage, yapf, and pylint
     """
-    pass
+    return SH.nosetests()
 
 
 def build():

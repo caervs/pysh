@@ -43,6 +43,9 @@ class CommandCall(object):
         self()
         return DELETE_STRING
 
+    def wait(self):
+        return self.command.wait()
+
     @staticmethod
     def to_str(str_or_byte):
         if isinstance(str_or_byte, str):
@@ -71,8 +74,11 @@ class PipingCall(CommandCall):
             previous_command = command
         last(wait=False, stdin=previous_command.stdout, **channels)
         if wait:
-            for command in self.commands:
-                command.wait()
+            self.wait()
+
+    def wait(self):
+        for command in self.commands:
+            command.wait()
 
     def __iter__(self):
         self(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
