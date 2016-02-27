@@ -145,8 +145,7 @@ class ProcessCommand(object):
 
     def __call__(self, wait=True, **channels):
         stdchannels = ['stdin', 'stdout', 'stderr']
-        unknown_channels = {key for key in channels if key not in
-                            stdchannels}
+        unknown_channels = {key for key in channels if key not in stdchannels}
         if unknown_channels:
             raise ValueError("Unknown channels", unknown_channels)
         self.subproc = subprocess.Popen(self.arguments, **channels)

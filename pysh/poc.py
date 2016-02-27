@@ -76,7 +76,6 @@ class AtomicCommand(Command):
         return self.status
 
 
-
 class CompositeCommand(Command):
     def __init__(self, subcommands, routing_policy):
         pass

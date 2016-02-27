@@ -25,4 +25,3 @@ def grep(expression: (str, "The expression to match against"),
 @FunctionCommand.from_generator
 def echo(*args: (str, "Strings to write to stdout")):
     yield " ".join(args), False
-

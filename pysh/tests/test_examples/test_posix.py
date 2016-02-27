@@ -3,6 +3,7 @@ import unittest
 
 from pysh.examples import posix
 
+
 class PosixTestCase(unittest.TestCase):
     pass
 

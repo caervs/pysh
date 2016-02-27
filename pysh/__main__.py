@@ -64,7 +64,7 @@ class PyshImportHook(object):
         # TODO set full path
         module.__file__ = src_path
         byte_code = compile(source, name, 'exec')
-        exec (byte_code, module.__dict__)
+        exec(byte_code, module.__dict__)
         sys.modules[name] = module
         return module
 
@@ -110,4 +110,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
