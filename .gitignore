@@ -3,3 +3,5 @@
 *pyc
 venv
 build
+lint.html
+yapf.txt

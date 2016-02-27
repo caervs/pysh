@@ -1,0 +1,18 @@
+[BASIC]
+
+bad-functions=input
+
+
+[EXCEPTIONS]
+
+overgeneral-exceptions=
+
+
+[MESSAGES CONTROL]
+
+disable=R0903, R0904, fixme, W0221
+
+
+[VARIABLES]
+
+dummy-variables-rgx=_.*$|dummy

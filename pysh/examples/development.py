@@ -30,6 +30,22 @@ def test_lint():
         raise TestFailure("Linting failed")
 
 
+def test_yapf():
+    """
+    Check current code-base for yapf formatting
+    """
+    pkg_path = os.environ["PYSH_PYLINT_PKG_PATH"]
+    proc = SH.python3('-m', 'yapf', '-d', '--recursive', pkg_path)
+    out, _err = proc
+    # TODO support funneling of calls
+    proj_path = os.path.dirname(pkg_path)
+    target_file = os.path.join(proj_path, 'yapf.txt')
+    if proc.wait():
+        with open(target_file, 'w') as f:
+            f.write(out)
+        raise TestFailure("Format check failed")
+
+
 @nottest
 def test():
     """
@@ -48,8 +64,10 @@ def test3():
     pysh_dir = os.path.dirname(commands_path)
     proj_dir = os.path.dirname(pysh_dir)
     pkg_name = os.path.basename(proj_dir)
+    # TODO rc should be configurable
+    rcpath = os.path.join(os.path.dirname(__file__), 'pylint.rc')
     # TODO fix when shell supports exporting
-    os.environ["PYSH_PYLINT_RC"] = "pylint.rc"
+    os.environ["PYSH_PYLINT_RC"] = rcpath
     os.environ["PYSH_PYLINT_PKG_PATH"] = os.path.join(proj_dir, pkg_name)
     return SH.python3('-m', 'nose', pkg_name, 'pysh.examples.development')
 
