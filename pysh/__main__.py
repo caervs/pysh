@@ -43,7 +43,7 @@ class PyshImportHook(object):
         if len(parts) > 4:
             raise NotImplementedError
         # TODO consider getting from __init__.py
-        self.make_and_cache_module(name, '')
+        root_module = self.make_and_cache_module(name, '')
         for submodule in ['commands', 'config']:
             src_path = os.path.join(pyshdir, submodule + '.py')
             if os.path.exists(src_path):
@@ -51,16 +51,22 @@ class PyshImportHook(object):
                     source = src_file.read()
             else:
                 source = ''
+                src_path = None
             submodule_name = "{}.{}".format(name, submodule)
-            self.make_and_cache_module(submodule_name, source)
+            module = self.make_and_cache_module(submodule_name, source,
+                                                src_path)
+            setattr(root_module, submodule, module)
 
-    def make_and_cache_module(self, name, source):
+    def make_and_cache_module(self, name, source, src_path=None):
+        if src_path is None:
+            src_path = name
         module = types.ModuleType(name, source)
         # TODO set full path
-        module.__file__ = name + '.pyc'
+        module.__file__ = src_path
         byte_code = compile(source, name, 'exec')
         exec (byte_code, module.__dict__)
         sys.modules[name] = module
+        return module
 
     def find_project_pysh_dir(self):
         # TODO implement
@@ -96,7 +102,8 @@ def main():
     if len(sys.argv) < 2:
         patch_and_run()
     elif sys.argv[1] == '-i':
-        subprocess.Popen(["python3", "-i", "pysh"]).wait()
+        path_to_pysh = os.path.abspath(__file__)
+        subprocess.Popen(["python3", "-i", path_to_pysh]).wait()
     else:
         patch_and_run(*sys.argv[1:])
 
