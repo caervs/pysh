@@ -47,15 +47,7 @@ def test_yapf():
 
 
 @nottest
-def test():
-    """
-    Run nose tests with coverage, yapf, and pylint
-    """
-    return SH.nosetests()
-
-
-@nottest
-def test3():
+def test(u: (bool, "Just unit tests for the package")=False):
     """
     Run nose tests with coverage, yapf, and pylint
     """
@@ -69,6 +61,8 @@ def test3():
     # TODO fix when shell supports exporting
     os.environ["PYSH_PYLINT_RC"] = rcpath
     os.environ["PYSH_PYLINT_PKG_PATH"] = os.path.join(proj_dir, pkg_name)
+    if u:
+        return SH.python3('-m', 'nose', pkg_name)
     return SH.python3('-m', 'nose', pkg_name, 'pysh.examples.development')
 
 

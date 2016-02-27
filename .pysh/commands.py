@@ -1,1 +1,1 @@
-from pysh.examples.development import test3 as test
+from pysh.examples.development import test
