@@ -9,14 +9,15 @@ def grep(expression: (str, "The expression to match against"),
          v: (bool, "Whether to match against complement")=False,
          *files: (str, "files to check")):
     if files:
-        yield from filegrep(expression, v, files)
+        # TODO implement
+        # yield from filegrep(expression, v, files)
         raise StopIteration
     line = yield None
     while True:
         if line is None:
             break
         # TODO regexp support
-        if expression in line:
+        if (expression in line) ^ v:
             line = yield line
         else:
             line = yield None

@@ -1,5 +1,3 @@
-import contextlib
-import io
 import functools
 import os
 import subprocess
@@ -28,11 +26,12 @@ class FunctionCommand(object):
         self.function = function
         self.arguments = self.canonicalize(args)
         self.exit_code = None
+        self.stdin = None
 
     @staticmethod
     def get_temp_path():
-        with tempfile.NamedTemporaryFile() as f:
-            return f.name
+        with tempfile.NamedTemporaryFile() as temp:
+            return temp.name
 
     def __call__(self, wait=True, **channels):
         for std_channel in ['stdin', 'stdout', 'stderr']:
@@ -107,10 +106,10 @@ class FunctionCommand(object):
         return str_or_byte.decode("utf-8")
 
     @staticmethod
-    def parse_message(message):
-        if not isinstance(message, tuple):
-            message = (message, )
-        message = list(message)
+    def parse_message(raw_message):
+        if not isinstance(raw_message, tuple):
+            raw_message = (raw_message, )
+        message = list(raw_message)
         if message[-1] is None:
             message[-1] = True
         if isinstance(message[-1], str):

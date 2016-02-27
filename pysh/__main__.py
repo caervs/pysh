@@ -12,21 +12,21 @@ class OutWrapper(object):
         self.stdout = sys.stdout
         self.delete_next = False
 
-    def write(self, s):
+    def write(self, string):
         if self.delete_next:
             self.delete_next = False
-            s = s[1:]
-        if s == shell.DELETE_STRING:
+            string = string[1:]
+        if string == shell.DELETE_STRING:
             self.delete_next = True
         else:
-            self.stdout.write(s)
+            self.stdout.write(string)
 
     def __getattr__(self, attr_name):
         return getattr(self.stdout, attr_name)
 
 
 class PyshImportHook(object):
-    def find_spec(self, fullname, path, target=None):
+    def find_spec(self, fullname, _path, _target=None):
         if fullname.startswith("pysh.scopes."):
             if fullname.startswith(
                     "pysh.scopes.standard") or fullname.startswith(
@@ -57,7 +57,8 @@ class PyshImportHook(object):
                                                 src_path)
             setattr(root_module, submodule, module)
 
-    def make_and_cache_module(self, name, source, src_path=None):
+    @staticmethod
+    def make_and_cache_module(name, source, src_path=None):
         if src_path is None:
             src_path = name
         module = types.ModuleType(name, source)
@@ -68,7 +69,8 @@ class PyshImportHook(object):
         sys.modules[name] = module
         return module
 
-    def find_project_pysh_dir(self):
+    @staticmethod
+    def find_project_pysh_dir():
         # TODO implement
         return ".pysh"
 
@@ -98,7 +100,6 @@ def patch_and_run(*command):
 
 
 def main():
-    import sys
     if len(sys.argv) < 2:
         patch_and_run()
     elif sys.argv[1] == '-i':

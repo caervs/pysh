@@ -1,5 +1,4 @@
 import functools
-import io
 import operator
 import os
 import unittest
@@ -13,15 +12,15 @@ class ShellTestCase(unittest.TestCase):
     def setUp(self):
         test_dir = os.path.dirname(__file__)
         self.shell = shell.Shell(test_dir, "pysh.examples.posix")
-        for command in ["grep", "echo"]:
-            new_name = "posix_" + command
-            setattr(posix, new_name, getattr(posix, command))
-            delattr(posix, command)
+        for cmd in ["grep", "echo"]:
+            new_name = "posix_" + cmd
+            setattr(posix, new_name, getattr(posix, cmd))
+            delattr(posix, cmd)
 
     def tearDown(self):
-        for command in ["grep", "echo"]:
-            new_name = "posix_" + command
-            setattr(posix, command, getattr(posix, new_name))
+        for cmd in ["grep", "echo"]:
+            new_name = "posix_" + cmd
+            setattr(posix, cmd, getattr(posix, new_name))
             delattr(posix, new_name)
 
 

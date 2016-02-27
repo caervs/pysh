@@ -1,9 +1,7 @@
 import enum
-import functools
 import importlib
 import os
 import subprocess
-import sys
 
 from pysh.interface.command import ProcessCommand
 
@@ -61,7 +59,6 @@ class PipingCall(CommandCall):
     def __call__(self, wait=True, **channels):
         first, *middle, last = self.commands
         first_channels = {'stdout': subprocess.PIPE}
-        last_channels = channels
         if 'stdin' in channels:
             first_channels['stdin'] = channels['stdin']
             del channels['stdin']
@@ -152,7 +149,7 @@ class FallbackChain(object):
         for obj in self.obj_chain:
             if hasattr(obj, attr_name):
                 return getattr(obj, attr_name)
-        raise AttributeError(key)
+        raise AttributeError(attr_name)
 
     def __setattr__(self, attr_name, attr):
         return setattr(self.obj_chain[0], attr_name, attr)

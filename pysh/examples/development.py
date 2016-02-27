@@ -22,9 +22,9 @@ def test_lint():
     out, _err = proc
     # TODO support funneling of calls
     proj_path = os.path.dirname(pkg_path)
-    target_file = os.path.join(proj_path, 'lint.html')
-    with open(target_file, 'w') as f:
-        f.write(out)
+    target_path = os.path.join(proj_path, 'lint.html')
+    with open(target_path, 'w') as target_file:
+        target_file.write(out)
 
     if proc.wait():
         raise TestFailure("Linting failed")
@@ -39,10 +39,10 @@ def test_yapf():
     out, _err = proc
     # TODO support funneling of calls
     proj_path = os.path.dirname(pkg_path)
-    target_file = os.path.join(proj_path, 'yapf.txt')
+    target_path = os.path.join(proj_path, 'yapf.txt')
     if proc.wait():
-        with open(target_file, 'w') as f:
-            f.write(out)
+        with open(target_path, 'w') as target_file:
+            target_file.write(out)
         raise TestFailure("Format check failed")
 
 
