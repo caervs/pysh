@@ -15,6 +15,8 @@ STANDARD_SEARCH_PATH = ":".join(["pysh.scopes.local.commands",
                                  "pysh.scopes.standard.commands", ])
 
 SEARCH_PATH = os.environ.get("PYSHPATH", STANDARD_SEARCH_PATH)
+
+# TODO think of a better way to suppress CommandCall output
 DELETE_STRING = "--DELETE NEXT 348ty1[29yavi--"
 
 
@@ -23,15 +25,14 @@ class CommandCall(object):
     A wrapper to allow for easy stringing of pysh commands
     """
 
-    def __init__(self, command):
+    def __init__(self, command=None, commands=None):
         self.command = command
+        self.commands = commands if commands else [command]
         self.status = None
 
     def __or__(self, other):
-        left_commands = [self.command] if hasattr(self, 'command') else \
-                        self.commands
-        right_commands = [other.command] if hasattr(other, 'command') else \
-                         other.commands
+        left_commands = self.commands
+        right_commands = other.commands
         return PipingCall(left_commands + right_commands)
 
     def __call__(self, wait=True, **channels):
@@ -72,7 +73,7 @@ class PipingCall(CommandCall):
     """
 
     def __init__(self, commands):
-        self.commands = commands
+        super().__init__(commands=commands)
 
     def __call__(self, wait=True, **channels):
         first, *middle, last = self.commands
