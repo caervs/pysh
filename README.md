@@ -1,4 +1,4 @@
-# pysh: a bridge between the python shell and your OS shell
+# pysh: a bridge between python and your OS shell
 
 Pysh is a tool for interacting with your machine that has the expressive power of a python shell and the versatility of an OS shell. Additionally it provides an extensible single point of entry for doing all of the common tasks associated with your projects like building, testing, and deploying your code and collecting documentation.
 
@@ -13,11 +13,12 @@ If you have pip3 installation is easy. Just run
 pip3 install -e git+https://github.com/caervs/pysh.git#egg=pysh
 ```
 
-## Interactive mode
+### Interactive mode
 
 Running pysh in interactive mode lets you call your everyday shell procedures as if they were python functions. To try out interactive mode just run `pysh` with no arguments.
 
 ```python3
+bash-3.2$ pysh
 >>> echo("Hello World!")
 Hello World!
 >>> 
@@ -31,7 +32,9 @@ Hello
 >>> 
 ```
 
-pretty cool, right? You might be thinking, "this is a fun academic exercise but what's the point?" Imagine having the expressability of python with the vocabulary of bash. You can elegantly combine subprocesses in ways that were too cumbersome before. For example, imagine you want to pipe the following file through a chain of greps:
+pretty cool, right? You might be thinking, "this is a fun academic exercise but what's the point?"
+
+Imagine having the expressability of python with the vocabulary of bash. You can elegantly combine subprocesses in ways that were too cumbersome before. For example, imagine you want to pipe the following file through a chain of greps:
 
 ```python3
 >>> out, _err = tee("example.txt")
@@ -52,7 +55,7 @@ Hello
 >>> 
 ```
 
-in bash you might have to create some super complex expression that's the combination of all of the expressions you want to test. If you can't do that you'll setting for manually creating a string of greps, one for each expression. With the power of python however pysh makes this easy, just run
+in bash you might have to create some super complex expression that's the combination of all of the expressions you want to test. If you can't do that you'll settle for manually creating a string of greps, one for each expression. With the power of python however pysh makes this easy, just run
 
 ```python3
 >>> prt("functools")
@@ -68,45 +71,88 @@ Hello
 
 Notice what we've done here. First we import `functools` and `operator` -- pysh monkey patch has a bug preventing the use of `import` (more on this later). Next we define our list of expressions which can be of arbitrary length. Finally we use some simple functional programming to chain together a cat and 4 grep processes to filter out `Hello` from the above file. Great.
 
-## Adding pysh to your project
+### Non-interactive mode
 
-is as easy as running "pysh init"
+Pysh also lets you easily define functions and subprocess calls that are then reachable from the command line. This is especially useful if you have project-specific commands that you want to distribute with your source tree but don't want to clutter your project with individual scripts.
 
-add new procedures with "pysh edit <module>"
+To get started just run this in your project directory
 
-call procedures with "pysh {module.function, function, re-router} arg0 arg1... argn --kvarg0=val0..."
+```bash
+bash-3.2$ pysh init
+Making .pysh directory
+Done
+bash-3.2$ 
+```
 
+This will create a *.pysh* directory with a *commands.py* module for your local commands and a *config.py* module for your local config. Now you can start adding local commands using
 
-## The pysh standard command set
+```bash
+bash-3.2$ EDITOR=<your editor of choice (e.g. emacs)> pysh edit
+```
 
-Should include:
-- building
-- building with Docker
-- creating virtual envs
-- testing (with nose maybe)
-- doc collection
-- quality testing (yapf and lint)
-- versioning
+the `pysh.examples` subpackage is full of example functions you can import (including some crude reimplementations of posix commands). To add nose testing with yapf and pylint to your project modify the *commands* module to include
 
+```python
+from pysh.examples.development import test
+```
 
-TODO extensibility --
+Now you can see the commands available to you with
 
-your global pysh config should consist of additional packages that will be referenced in any project you initialize.
+```bash
+bash-3.2$ pysh cmds
 
-Top level commands:
+Local Commands
+==========================
+test:     Run nose tests with coverage, yapf, and pylint
 
-- init: create the .pysh directory
-- config: modify local or global pysh configuration (change settings, add packages, etc)
-- edit: edit a local pysh module
+Standard Commands
+=============================
+cmds:     List existing pysh commands
+edit:     Edit a pysh command or module
+init:     Initialize this source-tree for project-specific pysh commands
+bash-3.2$ 
+```
 
-## Why would you do this?
+and run your tests
 
-All the power of your OS and the expressability of python -- 
+```
+bash-3.2$ pysh test
+...........
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+pysh.py                            0      0   100%   
+pysh/examples.py                   0      0   100%   
+pysh/examples/development.py      48     18    62%   38, 52-54, 63-75, 84, 92, 100
+pysh/examples/posix.py            15      1    93%   17
+pysh/interface.py                  0      0   100%   
+pysh/interface/command.py        118      3    97%   54, 92, 187
+pysh/interface/shell.py          109     20    82%   40, 50-51, 82-83, 134, 138-140, 153, 162, 168, 195,
+ 198-201, 204, 207, 210                                                                                
+pysh/scopes.py                     0      0   100%   
+pysh/scopes/local.py               0      0   100%   
+------------------------------------------------------------
+TOTAL                            290     42    86%   
+----------------------------------------------------------------------
+Ran 11 tests in 5.029s
 
-example -- doing a grep chain
+OK
+bash-3.2$ 
+```
 
-expressions = [...]
+and of course all this functionality is available from within pysh
 
-out, err = reduce(operator.or_, map(shell.grep, expressions),
-                  shell.cat('file.txt'))
+```
+bash-3.2$ pysh
+>>> cmds
 
+Local Commands
+==========================
+test:     Run nose tests with coverage, yapf, and pylint
+
+Standard Commands
+=============================
+cmds:     List existing pysh commands
+edit:     Edit a pysh command or module
+init:     Initialize this source-tree for project-specific pysh commands
+>>> 
+```
