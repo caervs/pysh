@@ -1,0 +1,23 @@
+[BASIC]
+
+bad-functions=input
+
+
+[EXCEPTIONS]
+
+overgeneral-exceptions=
+
+
+[MESSAGES CONTROL]
+
+disable=R0903, R0904, fixme, W0221, W0122
+
+
+[VARIABLES]
+
+dummy-variables-rgx=_.*$|dummy
+argument-rgx=[a-z_][a-z0-9_]{0,30}$
+attr-rgx=[a-z_][a-z0-9_]{0,30}$
+function-rgx=[a-z_][a-z0-9_]{0,30}$
+method-rgx=[a-z_][a-z0-9_]{0,30}$
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
