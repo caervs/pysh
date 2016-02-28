@@ -1,3 +1,7 @@
+"""
+Examples of pysh commands for common development workflows
+"""
+
 import os
 
 from nose.tools import nottest
@@ -8,6 +12,9 @@ SH = Shell(search_path='')
 
 
 class TestFailure(Exception):
+    """
+    raised when a test fails
+    """
     pass
 
 
@@ -70,18 +77,21 @@ def build():
     """
     build any docker images associated with this project
     """
-    pass
+    # TODO
+    raise NotImplementedError
 
 
-def setup():
+def mkvenv():
     """
     Create a virtual environment and install necessary packages
     """
-    pass
+    # TODO
+    raise NotImplementedError
 
 
 def enter():
     """
     Enter the virtual environment for the project
     """
-    pass
+    # TODO
+    raise NotImplementedError

@@ -8,6 +8,9 @@ from pysh.interface.command import FunctionCommand
 def grep(expression: (str, "The expression to match against"),
          v: (bool, "Whether to match against complement")=False,
          *files: (str, "files to check")):
+    """
+    grep as a pysh command
+    """
     if files:
         # TODO implement
         # yield from filegrep(expression, v, files)
@@ -25,4 +28,7 @@ def grep(expression: (str, "The expression to match against"),
 
 @FunctionCommand.from_generator
 def echo(*args: (str, "Strings to write to stdout")):
+    """
+    echo as a pysh command
+    """
     yield " ".join(args), False

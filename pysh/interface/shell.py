@@ -1,3 +1,7 @@
+"""
+main interface for pysh: core tools for running pysh commands
+"""
+
 import enum
 import importlib
 import os
@@ -15,6 +19,10 @@ DELETE_STRING = "--DELETE NEXT 348ty1[29yavi--"
 
 
 class CommandCall(object):
+    """
+    A wrapper to allow for easy stringing of pysh commands
+    """
+
     def __init__(self, command):
         self.command = command
         self.status = None
@@ -42,10 +50,16 @@ class CommandCall(object):
         return DELETE_STRING
 
     def wait(self):
+        """
+        wait for command to finish
+        """
         return self.command.wait()
 
     @staticmethod
     def to_str(str_or_byte):
+        """
+        decode byte from utf-8 encoding
+        """
         if isinstance(str_or_byte, str):
             return str_or_byte
         return str_or_byte.decode("utf-8")
@@ -53,6 +67,10 @@ class CommandCall(object):
 
 # TODO should be able to generalize to arbitrary IO redirection
 class PipingCall(CommandCall):
+    """
+    A CommandCall which pipes output from one command into another
+    """
+
     def __init__(self, commands):
         self.commands = commands
 
@@ -74,6 +92,9 @@ class PipingCall(CommandCall):
             self.wait()
 
     def wait(self):
+        """
+        wait for subcommands to finish
+        """
         for command in self.commands:
             command.wait()
 
@@ -84,11 +105,21 @@ class PipingCall(CommandCall):
 
 
 class ExecutionMode(enum.Enum):
+    """
+    The execution mode of the shell:
+
+    on_init: when the command is first initialized
+    on_read: when the caller tries to get output from the command
+    """
     on_init = 0
     on_read = 1
 
 
 class PartialCall(object):
+    """
+    A call which has not yet been given arguments
+    """
+
     def __init__(self, command_factory, working_dir):
         # TODO proper wrapping of command_factory
         self.command_factory = command_factory
@@ -109,6 +140,10 @@ class PartialCall(object):
 
 
 class Shell(object):
+    """
+    A means to calling pysh commands
+    """
+
     def __init__(self,
                  working_dir='.',
                  search_path=SEARCH_PATH,
@@ -120,13 +155,22 @@ class Shell(object):
         self.working_dir = working_dir
 
     def cd(self, new_dir):
+        """
+        change the working directory of the shell
+        """
         self.working_dir = new_dir
 
     def export(self, **kwargs):
+        """
+        export a variable to any subcommands
+        """
         self.exports.update(kwargs)
 
     @staticmethod
     def get_search_objs(search_path):
+        """
+        return a list of objects in which to search for subcommands
+        """
         if not search_path:
             return []
         return [importlib.import_module(module)
@@ -142,6 +186,10 @@ class Shell(object):
 
 
 class FallbackChain(object):
+    """
+    gets attrs by searching a chain of objects in sequence for that attr
+    """
+
     def __init__(self, *obj_chain):
         self.__dict__['obj_chain'] = obj_chain
 

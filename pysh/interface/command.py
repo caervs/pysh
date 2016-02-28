@@ -1,3 +1,7 @@
+"""
+Command: an abstraction that wraps subprocs and functions in a similar interface
+"""
+
 import functools
 import os
 import subprocess
@@ -30,6 +34,9 @@ class FunctionCommand(object):
 
     @staticmethod
     def get_temp_path():
+        """
+        return a path to a temporary file
+        """
         with tempfile.NamedTemporaryFile() as temp:
             return temp.name
 
@@ -53,12 +60,18 @@ class FunctionCommand(object):
             return self.wait()
 
     def wait(self):
+        """
+        wait for command to finish running
+        """
         while self.exit_code is None:
             continue
         # TODO better return value for non-wait case?
         return self.exit_code
 
     def make_buffers(self, channels):
+        """
+        make any FIFOs used for PIPEing in and out of function
+        """
         for channel_key, channel_value in channels.items():
             if channel_value != subprocess.PIPE:
                 continue
@@ -68,6 +81,9 @@ class FunctionCommand(object):
         # TODO figure out how to unlink FIFOs when done
 
     def execute(self, channels):
+        """
+        Run the function and act like a subprocess
+        """
         channels = dict(channels)
         for channel_name in sorted(channels.keys()):
             channel = channels[channel_name]
@@ -101,12 +117,18 @@ class FunctionCommand(object):
 
     @staticmethod
     def decode(str_or_byte):
+        """
+        decode utf-8 bytes to str objects
+        """
         if isinstance(str_or_byte, str):
             return str_or_byte
         return str_or_byte.decode("utf-8")
 
     @staticmethod
     def parse_message(raw_message):
+        """
+        parse a message yielded from the command function
+        """
         if not isinstance(raw_message, tuple):
             raw_message = (raw_message, )
         message = list(raw_message)
@@ -125,19 +147,34 @@ class FunctionCommand(object):
 
     @classmethod
     def from_generator(cls, generator):
+        """
+        Create a FunctionCommand from a generator function
+        """
+
         @functools.wraps(generator)
         def wrapper(*args):
+            """
+            wrap the generator function to create a FunctionCommand
+            from args passed into the generator function
+            """
             return cls(generator, *args)
 
         return wrapper
 
     @staticmethod
     def canonicalize(args):
+        """
+        Convert flags and dash-args to booleans and kwargs
+        """
         # TODO Convert flags and dash-args to booleans and kwargs
         return args
 
 
 class ProcessCommand(object):
+    """
+    A pysh command wrapping a subprocess
+    """
+
     def __init__(self, proc_name, *args):
         self.arguments = [proc_name] + self.canonicalize(args)
         self.subproc = None
@@ -154,13 +191,22 @@ class ProcessCommand(object):
             return self.wait()
 
     def wait(self):
+        """
+        wait for the subprocess to finish
+        """
         return self.subproc.wait()
 
     @classmethod
     def from_proc_name(cls, proc_name):
+        """
+        create a ProcessCommand given a process name
+        """
         return functools.partial(cls, proc_name)
 
     @staticmethod
     def canonicalize(args):
+        """
+        Convert flags and dash-args to booleans and kwargs
+        """
         # TODO Convert flags and dash-args to booleans and kwargs
         return list(args)
