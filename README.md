@@ -1,9 +1,16 @@
 # pysh: a bridge between python and your OS shell
 
-Pysh is a tool for interacting with your machine that has the expressive power of a python shell and the versatility of an OS shell. Additionally it provides an extensible single point of entry for doing all of the common tasks associated with your projects like building, testing, and deploying your code and collecting documentation.
-
+**Table of Contents**
+* [Getting Started](#getting-started)
+  * [Installation](#installation)
+  * [Interactive Mode](#interactive-mode)
+  * [Non-interactive Mode](#non-interactive-mode)
+* [Contributing](#contributing)
+  * [Running tests](#running-tests)
 
 ## Getting Started
+
+Pysh is a tool for interacting with your machine that has the expressive power of a python shell and the versatility of an OS shell. Pysh provides an extensible single point of entry for doing all of the common tasks associated with your projects like building, testing, and deploying your code and collecting documentation.
 
 ### Installation
 
@@ -96,7 +103,7 @@ Done
 bash-3.2$ 
 ```
 
-This will create a **.pysh** directory with a **commands.py** module for your local commands and a **config.py** module for your local config. Save and exit. Now you can start adding local commands using
+This will create a **.pysh** directory with a **commands.py** module for your local commands and a **config.py** module for your local config. Now you can start adding local commands using
 
 ```bash
 bash-3.2$ EDITOR=<your editor of choice (e.g. emacs)> pysh edit
@@ -108,7 +115,7 @@ The `pysh.examples` subpackage is full of example functions you can import (incl
 from pysh.examples.development import test
 ```
 
-Now you can see the commands available to you with
+Save and exit. Now you can see the commands available to you with
 
 ```
 bash-3.2$ pysh cmds
@@ -172,7 +179,7 @@ init:     Initialize this source-tree for project-specific pysh commands
 
 ## Contributing
 
-PRs and general suggestions are welcome. This project is still a preliminary proof of concept but I hope that it will some day be a usable robust shell. Please ensure that you pass the automated test suite before submitting a request.
+PRs and general suggestions are welcome. This project is still a preliminary proof of concept but I hope that it will someday be a usable robust shell. Please ensure that you pass the automated test suite before submitting a request.
 
 ### Running tests
 
