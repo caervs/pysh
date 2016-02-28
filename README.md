@@ -24,7 +24,7 @@ Hello World!
 >>> 
 ```
 
-that's all there is. The pysh interpreter is just a standard python3 interpreter with a little monkey patching so anything you can do in python you can do in pysh. Piping is done with python syntax but has a look similar to if you were running bash.
+That's all there is. The pysh interpreter is just a standard python3 interpreter with a little monkey patching so anything you can do in python you can do in pysh. Piping is done with python syntax but has a look similar to that of bash.
 
 ```python3
 >>> echo("Hello\nWorld") | grep("H")
@@ -71,7 +71,7 @@ Hello
 
 Notice what we've done here. First we import `functools` and `operator` -- pysh monkey patch has a bug preventing the use of `import` (more on this later). Next we define our list of expressions which can be of arbitrary length. Finally we use some simple functional programming to chain together a cat and 4 grep processes to filter out `Hello` from the above file. Great.
 
-Getting the output instead of printing it is easy to. Just do some assignment unpacking...
+Getting the output instead of printing it is easy too. Just do some assignment unpacking...
 
 
 ```
@@ -96,13 +96,13 @@ Done
 bash-3.2$ 
 ```
 
-This will create a **.pysh** directory with a **commands.py** module for your local commands and a **config.py** module for your local config. Now you can start adding local commands using
+This will create a **.pysh** directory with a **commands.py** module for your local commands and a **config.py** module for your local config. Save and exit. Now you can start adding local commands using
 
 ```bash
 bash-3.2$ EDITOR=<your editor of choice (e.g. emacs)> pysh edit
 ```
 
-the `pysh.examples` subpackage is full of example functions you can import (including some crude reimplementations of posix commands). To add nose testing with yapf and pylint to your project modify the *commands* module to include
+The `pysh.examples` subpackage is full of example functions you can import (including some crude reimplementations of posix commands). To add nose testing with yapf and pylint to your project modify the **commands.py** module to include
 
 ```python
 from pysh.examples.development import test
@@ -110,7 +110,7 @@ from pysh.examples.development import test
 
 Now you can see the commands available to you with
 
-```bash
+```
 bash-3.2$ pysh cmds
 
 Local Commands
@@ -151,7 +151,7 @@ OK
 bash-3.2$ 
 ```
 
-and of course all this functionality is available from within pysh
+and of course all of this functionality is available from within pysh
 
 ```
 bash-3.2$ pysh
@@ -172,5 +172,16 @@ init:     Initialize this source-tree for project-specific pysh commands
 
 ## Contributing
 
-PRs and general suggestions are welcome. This project is still a preliminary proof of concept but I hope that it will some day be a usable robust shell. 
+PRs and general suggestions are welcome. This project is still a preliminary proof of concept but I hope that it will some day be a usable robust shell. Please ensure that you pass the automated test suite before submitting a request.
+
+### Running tests
+
+Pysh can, not surprisingly, run the pysh test suite on itself. To run the unit tests simply run
+
+```
+pysh test
+```
+
+you may also run it with the `-u` option to temporarily disable slow quality tests. The quality tests include pylint checks (the results of which are stored in `lint.html`) and a yapf formatting test (the diff of which is stored in yapf.txt if you don't pass).
+
 
