@@ -7,6 +7,8 @@ import os
 import sys
 import types
 
+import pysh
+
 from pysh.interface import shell
 
 
@@ -60,11 +62,10 @@ class PyshImportHook(object):
         """
         Load a module spec for an import path
         """
-        if name.startswith("pysh.scopes.local"):
-            pyshdir = self.find_project_pysh_dir()
+        if self.is_valid_scope(name):
+            pyshdir = self.find_pysh_scope(name)
         else:
-            # TODO implement user, global, and standard scopes
-            raise NotImplementedError
+            raise ValueError("Unknown pysh scope", name)
         parts = name.split(".")
         if len(parts) > 4:
             raise NotImplementedError
@@ -97,6 +98,34 @@ class PyshImportHook(object):
         exec(byte_code, module.__dict__)
         sys.modules[name] = module
         return module
+
+    @staticmethod
+    def is_valid_scope(name):
+        """
+        return True iff name is the name of a valid scope
+        """
+        return name in [
+            "pysh.scopes.current",
+            "pysh.scopes.local",
+            "pysh.scopes.user",
+            "pysh.scopes.global",
+            "pysh.scopes.standard",
+        ]
+
+    def find_pysh_scope(self, name):
+        """
+        find the .pysh directory containing the modules for a pysh scope
+        """
+        directories = {
+            'current': os.path.join(
+                os.path.dirname(pysh.__file__), 'scopes', 'current'),
+            'standard': os.path.join(
+                os.path.dirname(pysh.__file__), 'scopes', 'standard'),
+            'local': self.find_project_pysh_dir(),
+            'user': os.path.expanduser("~/.pysh/"),
+            'global': "/etc/.pysh/",
+        }
+        return directories[name[len("pysh.scopes."):]]
 
     @staticmethod
     def find_project_pysh_dir():
@@ -132,9 +161,7 @@ def patch_and_run(*command):
     """
     sys.stdout = OutWrapper()
     sys.meta_path.insert(0, PyshImportHook())
-    chain = shell.FallbackChain(
-        globals()['__builtins__'],
-        shell.Shell(search_path='pysh.scopes.local.commands'))
+    chain = shell.FallbackChain(globals()['__builtins__'], shell.Shell())
     globals()['__builtins__'] = chain
     globals()['prt'] = import_module
     if command:

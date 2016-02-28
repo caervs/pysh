@@ -6,6 +6,7 @@ import os
 
 from nose.tools import nottest
 
+from pysh.interface.command import pyshcommand
 from pysh.interface.shell import Shell
 
 SH = Shell(search_path='')
@@ -53,6 +54,7 @@ def test_yapf():
         raise TestFailure("Format check failed")
 
 
+@pyshcommand
 @nottest
 def test(u: (bool, "Just unit tests for the package")=False):
     """
@@ -69,8 +71,9 @@ def test(u: (bool, "Just unit tests for the package")=False):
     os.environ["PYSH_PYLINT_RC"] = rcpath
     os.environ["PYSH_PYLINT_PKG_PATH"] = os.path.join(proj_dir, pkg_name)
     if u:
-        return SH.python3('-m', 'nose', pkg_name)
-    return SH.python3('-m', 'nose', pkg_name, 'pysh.examples.development')
+        return SH.python3('-m', 'nose', '--with-coverage', pkg_name)
+    return SH.python3('-m', 'nose', '--with-coverage', pkg_name,
+                      'pysh.examples.development')
 
 
 def build():

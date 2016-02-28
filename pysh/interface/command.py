@@ -135,7 +135,7 @@ class FunctionCommand(object):
         if message[-1] is None:
             message[-1] = True
         if isinstance(message[-1], str):
-            message.append(True)
+            message.append(False)
         if len(message) == 1:
             return None, message[0], "\n"
 
@@ -152,6 +152,7 @@ class FunctionCommand(object):
         """
 
         @functools.wraps(generator)
+        @pyshcommand
         def wrapper(*args):
             """
             wrap the generator function to create a FunctionCommand
@@ -210,3 +211,19 @@ class ProcessCommand(object):
         """
         # TODO Convert flags and dash-args to booleans and kwargs
         return list(args)
+
+
+def pyshcommand(cmd):
+    """
+    generator letting pysh know wrapped function is a pysh command
+    """
+
+    @functools.wraps(cmd)
+    def wrapper(*args, **kwargs):
+        """
+        run the wrapped function
+        """
+        return cmd(*args, **kwargs)
+
+    wrapper.is_pysh_command = True
+    return wrapper

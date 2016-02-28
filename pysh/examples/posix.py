@@ -21,7 +21,7 @@ def grep(expression: (str, "The expression to match against"),
             break
         # TODO regexp support
         if (expression in line) ^ v:
-            line = yield line
+            line = yield line, True
         else:
             line = yield None
 
@@ -31,4 +31,4 @@ def echo(*args: (str, "Strings to write to stdout")):
     """
     echo as a pysh command
     """
-    yield " ".join(args), False
+    yield " ".join(args)
