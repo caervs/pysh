@@ -1,14 +1,21 @@
 # pysh
-Pysh: the python shell
+Pysh: a bridge between the python shell and your OS shell
 
 
 Pysh is a tool for interacting with your machine that has the expressive power of a python shell and the versatility of an OS shell. Additionally it provides an extensible single point of entry for doing all of the common tasks associated with your projects like building, testing, and deploying your code and collecting documentation.
 
 
-## Installing
+## Getting Started
 
+### Installation
 
-## Using interactive mode
+If you have pip3 installation is easy. Just run
+
+```bash
+pip3 install -e git+https://github.com/caervs/pysh.git#egg=pysh
+```
+
+## Interactive mode
 
 Running pysh in interactive mode lets you call your everyday shell procedures as if they were python functions
 
