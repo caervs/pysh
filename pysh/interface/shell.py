@@ -35,6 +35,9 @@ class CommandCall(object):
         right_commands = other.commands
         return PipingCall(left_commands + right_commands)
 
+    def __gt__(self, filename):
+        return FunnelCall(self, filename)
+
     def __call__(self, wait=True, **channels):
         if self.status is not None:
             return
@@ -64,6 +67,22 @@ class CommandCall(object):
         if isinstance(str_or_byte, str):
             return str_or_byte
         return str_or_byte.decode("utf-8")
+
+
+# TODO should subclass CommandCall
+class FunnelCall(object):
+    def __init__(self, command_call, outfile):
+        self.command_call = command_call
+        self.outfile = outfile
+
+    def __call__(self, **kwargs):
+        with open(self.outfile, 'w') as f:
+            kwargs['stdout'] = f
+            return self.command_call(**kwargs)
+
+    def __repr__(self):
+        self()
+        return DELETE_STRING
 
 
 # TODO should be able to generalize to arbitrary IO redirection
@@ -138,6 +157,9 @@ class PartialCall(object):
         if isinstance(other, PartialCall):
             return self() | other()
         return self() | other
+
+    def __gt__(self, outfile):
+        return self() > outfile
 
 
 class Shell(object):

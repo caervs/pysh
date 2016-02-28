@@ -34,10 +34,10 @@ Hello
 
 pretty cool, right? You might be thinking, "this is a fun academic exercise but what's the point?"
 
-Imagine having the expressability of python with the vocabulary of bash. You can elegantly combine subprocesses in ways that were too cumbersome before. For example, imagine you want to pipe the following file through a chain of greps:
+Imagine having the expressability of python with the vocabulary of bash. You can elegantly combine subprocesses in ways that were too cumbersome before. For example, let's write the file **example.txt**
 
 ```python3
->>> out, _err = tee("example.txt")
+>>> cat > "example.txt"
 1
 2
 3
@@ -55,7 +55,7 @@ Hello
 >>> 
 ```
 
-in bash you might have to create some super complex expression that's the combination of all of the expressions you want to test. If you can't do that you'll settle for manually creating a string of greps, one for each expression. With the power of python however pysh makes this easy, just run
+and then filter the file through a chain of regular expressions. In bash you might have to create some super complex expression that's the combination of all of the expressions you want to test. If you can't do that you'll settle for manually creating a string of greps, one for each expression. With the power of python however pysh makes this easy, just run
 
 ```python3
 >>> prt("functools")
@@ -71,9 +71,21 @@ Hello
 
 Notice what we've done here. First we import `functools` and `operator` -- pysh monkey patch has a bug preventing the use of `import` (more on this later). Next we define our list of expressions which can be of arbitrary length. Finally we use some simple functional programming to chain together a cat and 4 grep processes to filter out `Hello` from the above file. Great.
 
+Getting the output instead of printing it is easy to. Just do some assignment unpacking...
+
+
+```
+>>> out, err = cat("example.txt") | grep("o")
+>>> print(out)
+o
+Hello
+
+>>> 
+```
+
 ### Non-interactive mode
 
-Pysh also lets you easily define functions and subprocess calls that are then reachable from the command line. This is especially useful if you have project-specific commands that you want to distribute with your source tree but don't want to clutter your project with individual scripts.
+Pysh lets you easily define functions and subprocess calls that are then reachable from the command line. This is especially useful if you have project-specific commands that you want to distribute with your source tree but don't want to clutter your project with individual scripts.
 
 To get started just run this in your project directory
 
@@ -84,7 +96,7 @@ Done
 bash-3.2$ 
 ```
 
-This will create a *.pysh* directory with a *commands.py* module for your local commands and a *config.py* module for your local config. Now you can start adding local commands using
+This will create a **.pysh** directory with a **commands.py** module for your local commands and a **config.py** module for your local config. Now you can start adding local commands using
 
 ```bash
 bash-3.2$ EDITOR=<your editor of choice (e.g. emacs)> pysh edit
@@ -156,3 +168,9 @@ edit:     Edit a pysh command or module
 init:     Initialize this source-tree for project-specific pysh commands
 >>> 
 ```
+
+
+## Contributing
+
+PRs and general suggestions are welcome. This project is still a preliminary proof of concept but I hope that it will some day be a usable robust shell. 
+
