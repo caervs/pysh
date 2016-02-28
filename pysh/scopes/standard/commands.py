@@ -1,30 +1,39 @@
+import os
 import functools
 
-from pysh.interface.command import Command, FunctionCommand
+from pysh.interface.command import Command, FunctionCommand, pyshcommand
 from pysh.interface.shell import Shell
 
 SH = Shell()
 
 
+@FunctionCommand.from_generator
 def init():
     """
-    Initialize this source-tree for project specific pysh commands
+    Initialize this source-tree for project-specific pysh commands
     """
-    pass
+    yield "Making .pysh directory"
+    SH.mkdir(".pysh")()
+    SH.touch(".pysh/commands.py", ".pysh/config.py")()
+    yield "Done"
 
 
+@pyshcommand
 def edit():
     """
     Edit a pysh command or module
     """
-    pass
+    from pysh.interface.hook import PyshImportHook
+    pysh_dir = PyshImportHook.find_project_pysh_dir()
+    return getattr(SH, os.environ.get(
+        "EDITOR", "nano"))(os.path.join(pysh_dir, 'commands.py'))
 
 
 def config():
     """
     Modify or read pysh settings
     """
-    pass
+    raise NotImplementedError
 
 
 def _readable_description(module_name):
@@ -41,7 +50,7 @@ def _readable_description(module_name):
 
 
 @FunctionCommand.from_generator
-def ls():
+def cmds():
     """
     List existing pysh commands
     """

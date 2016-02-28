@@ -7,5 +7,5 @@ setup(name='pysh',
       author_email='rdabrams@gmail.com',
       url='https://github.com/caervs/pysh',
       packages=['pysh', 'pysh.interface', 'pysh.examples', 'pysh.scopes',
-                'pysh.tests'],
+                'pysh.scopes.standard', 'pysh.tests'],
       scripts=['scripts/pysh'], )
