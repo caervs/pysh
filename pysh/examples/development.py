@@ -25,12 +25,21 @@ def test_lint():
     """
     rcpath = os.environ.get("PYSH_PYLINT_RC", "pylint.rc")
     pkg_path = os.environ["PYSH_PYLINT_PKG_PATH"]
-    proc = SH.python3('-m', 'pylint', '--rcfile={}'.format(rcpath), '-f',
-                      'html', pkg_path)
-    out, _err = proc
+    pylint_plugins = os.environ.get("PYSH_PYLINT_PLUGINS")
+    plugin_args = ['--load-plugins', pylint_plugins] if pylint_plugins else []
+    args = ['-m', 'pylint', '--rcfile={}'.format(rcpath)] + plugin_args + [
+        '-f', 'html', pkg_path
+    ]
+    proc = SH.python3(*args)
+    out, err = proc
     # TODO support funneling of calls
     proj_path = os.path.dirname(pkg_path)
     target_path = os.path.join(proj_path, 'lint.html')
+    err_path = os.path.join(proj_path, 'lint_err.txt')
+    if err:
+        with open(err_path, 'w') as err_file:
+            err_file.write(err)
+
     with open(target_path, 'w') as target_file:
         target_file.write(out)
 
@@ -60,13 +69,18 @@ def test(u: (bool, "Just unit tests for the package")=False):
     """
     Run nose tests with coverage, yapf, and pylint
     """
-    from pysh.scopes.local import commands
+    from pysh.scopes.local import commands, config
+    # TODO standardize config interface
+    cmd_config = getattr(config, 'COMMAND_OPTIONS', {})
+    pylint_plugins = cmd_config.get('pysh.development.test.pylint_plugins')
     commands_path = os.path.abspath(commands.__file__)
     pysh_dir = os.path.dirname(commands_path)
     proj_dir = os.path.dirname(pysh_dir)
     pkg_name = os.path.basename(proj_dir)
     # TODO rc should be configurable
     rcpath = os.path.join(os.path.dirname(__file__), 'pylint.rc')
+    if pylint_plugins:
+        os.environ["PYSH_PYLINT_PLUGINS"] = ",".join(pylint_plugins)
     # TODO fix when shell supports exporting
     os.environ["PYSH_PYLINT_RC"] = rcpath
     os.environ["PYSH_PYLINT_PKG_PATH"] = os.path.join(proj_dir, pkg_name)

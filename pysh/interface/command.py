@@ -47,7 +47,7 @@ class FunctionCommand(object):
 
         self.make_buffers(channels)
         threading.Thread(target=self.execute, args=(channels, )).start()
-        for channel_name in sorted(channels.keys()):
+        for channel_name in sorted(channels):
             channel = channels[channel_name]
             if isinstance(channel, str):
                 if channel_name == "stdin":
