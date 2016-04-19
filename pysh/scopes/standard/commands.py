@@ -1,7 +1,12 @@
+"""
+Commands accessible from any pysh project
+"""
+
+
 import os
 import functools
 
-from pysh.interface.command import Command, FunctionCommand, pyshcommand
+from pysh.interface.command import FunctionCommand, pyshcommand
 from pysh.interface.shell import Shell
 
 SH = Shell()
@@ -60,7 +65,7 @@ def cmds():
         cmd_attrs = {
             attrname: attr
             for attrname, attr in all_attrs.items()
-            if getattr(attr, 'is_pysh_command', False) == True
+            if getattr(attr, 'is_pysh_command', False) is True
         }
 
         if not cmd_attrs:
