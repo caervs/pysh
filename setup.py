@@ -8,4 +8,5 @@ setup(name='pysh',
       url='https://github.com/caervs/pysh',
       packages=['pysh', 'pysh.interface', 'pysh.examples', 'pysh.scopes',
                 'pysh.scopes.standard', 'pysh.tests'],
+      package_data={'pysh.examples': ['*rc']},
       scripts=['scripts/pysh'], )

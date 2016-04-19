@@ -10,7 +10,7 @@ overgeneral-exceptions=
 
 [MESSAGES CONTROL]
 
-disable=R0903, R0904, fixme, W0221, W0122
+disable=R0903, R0904, fixme, W0221, W0122, E1101, E1103
 
 
 [VARIABLES]
