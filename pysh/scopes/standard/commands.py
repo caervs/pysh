@@ -2,7 +2,6 @@
 Commands accessible from any pysh project
 """
 
-
 import os
 import functools
 

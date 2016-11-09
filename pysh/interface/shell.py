@@ -9,10 +9,12 @@ import subprocess
 
 from pysh.interface.command import ProcessCommand
 
-STANDARD_SEARCH_PATH = ":".join(["pysh.scopes.local.commands",
-                                 "pysh.scopes.user.commands",
-                                 "pysh.scopes.global.commands",
-                                 "pysh.scopes.standard.commands", ])
+STANDARD_SEARCH_PATH = ":".join([
+    "pysh.scopes.local.commands",
+    "pysh.scopes.user.commands",
+    "pysh.scopes.global.commands",
+    "pysh.scopes.standard.commands",
+])
 
 SEARCH_PATH = os.environ.get("PYSHPATH", STANDARD_SEARCH_PATH)
 
@@ -107,9 +109,10 @@ class PipingCall(CommandCall):
         first(wait=False, **first_channels)
         previous_command = first
         for command in middle:
-            command(wait=False,
-                    stdin=previous_command.stdout,
-                    stdout=subprocess.PIPE)
+            command(
+                wait=False,
+                stdin=previous_command.stdout,
+                stdout=subprocess.PIPE)
             previous_command = command
         last(wait=False, stdin=previous_command.stdout, **channels)
         if wait:
@@ -200,8 +203,10 @@ class Shell(object):
         """
         if not search_path:
             return []
-        return [importlib.import_module(module)
-                for module in search_path.split(":")]
+        return [
+            importlib.import_module(module)
+            for module in search_path.split(":")
+        ]
 
     def __getattr__(self, cmd_name):
         for search_obj in self.search_objs:

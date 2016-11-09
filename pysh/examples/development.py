@@ -57,7 +57,7 @@ def test_yapf():
     # TODO support funneling of calls
     proj_path = os.path.dirname(pkg_path)
     target_path = os.path.join(proj_path, 'yapf.txt')
-    if proc.wait():
+    if out:
         with open(target_path, 'w') as target_file:
             target_file.write(out)
         raise TestFailure("Format check failed")
