@@ -23,17 +23,18 @@ def test_lint():
     """
     Lint the current codebase
     """
-    rcpath = os.environ.get("PYSH_PYLINT_RC", "pylint.rc")
-    pkg_path = os.environ["PYSH_PYLINT_PKG_PATH"]
+    default_rcpath = os.path.join(os.path.dirname(__file__), 'pylint.rc')
+    rcpath = os.environ.get("PYSH_PYLINT_RC", default_rcpath)
+    pkg_paths = list(os.environ["PYSH_PYLINT_PKG_PATH"].split(","))
     pylint_plugins = os.environ.get("PYSH_PYLINT_PLUGINS")
     plugin_args = ['--load-plugins', pylint_plugins] if pylint_plugins else []
     args = ['-m', 'pylint', '--rcfile={}'.format(rcpath)] + plugin_args + [
-        '-f', 'html', pkg_path
-    ]
+        '-f', 'html'
+    ] + pkg_paths
     proc = SH.python3(*args)
     out, err = proc
     # TODO support funneling of calls
-    proj_path = os.path.dirname(pkg_path)
+    proj_path = os.environ.get("PYSH_PROJ_PATH", os.path.dirname(pkg_paths[0]))
     target_path = os.path.join(proj_path, 'lint.html')
     err_path = os.path.join(proj_path, 'lint_err.txt')
     if err:
@@ -51,11 +52,11 @@ def test_yapf():
     """
     Check current code-base for yapf formatting
     """
-    pkg_path = os.environ["PYSH_PYLINT_PKG_PATH"]
-    proc = SH.python3('-m', 'yapf', '-d', '--recursive', pkg_path)
+    pkg_paths = list(os.environ["PYSH_YAPF_PKG_PATH"].split(","))
+    proc = SH.python3('-m', 'yapf', '-d', '--recursive', *pkg_paths)
     out, _err = proc
     # TODO support funneling of calls
-    proj_path = os.path.dirname(pkg_path)
+    proj_path = os.environ.get("PYSH_PROJ_PATH", os.path.dirname(pkg_paths[0]))
     target_path = os.path.join(proj_path, 'yapf.txt')
     if out:
         with open(target_path, 'w') as target_file:
@@ -78,12 +79,11 @@ def test(u: (bool, "Just unit tests for the package")=False):
     proj_dir = os.path.dirname(pysh_dir)
     pkg_name = os.path.basename(proj_dir)
     # TODO rc should be configurable
-    rcpath = os.path.join(os.path.dirname(__file__), 'pylint.rc')
     if pylint_plugins:
         os.environ["PYSH_PYLINT_PLUGINS"] = ",".join(pylint_plugins)
     # TODO fix when shell supports exporting
-    os.environ["PYSH_PYLINT_RC"] = rcpath
     os.environ["PYSH_PYLINT_PKG_PATH"] = os.path.join(proj_dir, pkg_name)
+    os.environ["PYSH_YAPF_PKG_PATH"] = os.path.join(proj_dir, pkg_name)
     if u:
         return SH.python3('-m', 'nose', '--with-coverage', pkg_name)
     return SH.python3('-m', 'nose', '--with-coverage', pkg_name,
